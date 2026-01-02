@@ -1,23 +1,51 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { usePathname } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
+import { Suspense } from 'react';
 
-export default function NotFoundPage() {
-  const t = useTranslations('NOT_FOUND_PAGE');
-  const pathname = usePathname();
-  // pathname'den locale'i çıkar (örn: /tr/not-found -> tr)
-  const locale = pathname.split('/')[1] || 'tr';
+// Çeviri mesajları
+const translations = {
+  tr: {
+    NOT_PAGE: "Aradığınız sayfaya şu anda ulaşılamıyor.",
+    ERROR_MESSAGE: "Panik yok! Aradığın etkinliklere ulaşmak için anasayfaya dönebilirsin.",
+    HOME_PAGE: "Anasayfa"
+  },
+  en: {
+    NOT_PAGE: "The page you are looking for is currently unavailable.",
+    ERROR_MESSAGE: "Don't panic! You can return to the homepage to find the events you are looking for.",
+    HOME_PAGE: "Homepage"
+  },
+  de: {
+    NOT_PAGE: "Die von Ihnen gesuchte Seite ist derzeit nicht verfügbar.",
+    ERROR_MESSAGE: "Keine Panik! Sie können zur Startseite zurückkehren, um auf die gesuchten Veranstaltungen zuzugreifen.",
+    HOME_PAGE: "Homepage"
+  }
+};
+
+function NotFoundContent() {
+  const searchParams = useSearchParams();
+  const lang = (searchParams.get('lang') || 'tr') as 'tr' | 'en' | 'de';
+  
+  // Geçerli dil kontrolü
+  const currentLang = ['tr', 'en', 'de'].includes(lang) ? lang : 'tr';
+  const t = translations[currentLang];
 
   const handleHomeClick = () => {
     // Mevcut domain'in ana sayfasına yönlendir
-    window.location.href = `/${locale}`;
+    window.location.href = window.location.origin + '/' + currentLang;
   };
 
   return (
     <>
       <style jsx global>{`
+        body,
+        html {
+          background: #e21d39 !important;
+          margin: 0;
+          padding: 0;
+        }
+
         footer {
           margin-top: 0px !important;
         }
@@ -32,9 +60,9 @@ export default function NotFoundPage() {
           height={400}
           priority
         />
-        <h4>{t('NOT_PAGE')}</h4>
+        <h4>{t.NOT_PAGE}</h4>
         <h4 className="text-404">
-          {t('ERROR_MESSAGE')}
+          {t.ERROR_MESSAGE}
           <Image 
             src="/smile.png" 
             alt="404NotPage"
@@ -43,18 +71,16 @@ export default function NotFoundPage() {
             className="smile-icon"
           />
         </h4>
-        <a onClick={handleHomeClick}>{t('HOME_PAGE')}</a>
+        <a onClick={handleHomeClick}>{t.HOME_PAGE}</a>
       </section>
 
       <style jsx>{`
         .page-404 {
-          background: #e21d39;
           display: flex;
           align-items: center;
           justify-content: center;
           flex-flow: column;
-          margin-top: 60px;
-          min-height: calc(100vh - 60px);
+          min-height: 100vh;
           padding: 40px 20px;
         }
 
@@ -122,6 +148,14 @@ export default function NotFoundPage() {
         }
       `}</style>
     </>
+  );
+}
+
+export default function NotFoundPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <NotFoundContent />
+    </Suspense>
   );
 }
 

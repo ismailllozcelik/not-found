@@ -3,11 +3,12 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function RootNotFound() {
+export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    router.push('/not-found?lang=tr');
+    // Ana sayfaya gelenleri /not-found'a yönlendir
+    //router.push('/not-found?lang=tr');
   }, [router]);
 
   return null;
